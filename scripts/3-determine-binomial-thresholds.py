@@ -184,8 +184,12 @@ class SkyeMetric(object):
 def run_skye(prefix, binsize=0.5, p_threshold=1e-6, p_threshold_global=1e-6):
     #output_prefix = 'output/{}-bin{:.2f}-p{:.0e}-pg{:.0e}'.format(prefix, binsize, p_threshold, p_threshold_global)
     output_prefix = 'output/{}-bin{:.2f}-p{:.0e}'.format(prefix, binsize, p_threshold)
+    if prefix == 'ss1':
+        transit_rates_fn = 'ops-tces-transit-rates.csv'
+    else:
+        transit_rates_fn = prefix + '-tces-transit-rates.csv'
     skye = SkyeMetric(prefix + '-tces-transits.csv',
-                      prefix + '-tces-transit-rates.csv',
+                      transit_rates_fn,
                       binsize=binsize,
                       probability_threshold=p_threshold,
                       probability_threshold_combined=p_threshold_global)
@@ -203,8 +207,8 @@ if __name__ == '__main__':
     #                p_threshold=1e-10)
     
     for binsize in [0.5]:
-        for p_threshold in [1e-9, 1e-7, 1e-6, 1e-5, 1e-4]:
-            skye = run_skye('ops',
+        for p_threshold in [1e-9, 1e-6, 1e-5, 1e-4, 5e-4, 1e-3, 1e-2]:
+            skye = run_skye('ss1',
                             binsize=binsize,
                             p_threshold=p_threshold,
                             p_threshold_global=1e-12) 

@@ -58,8 +58,8 @@ def make_transit_table(tce_input_fn, robovetter_input_fn=None,
         # Both tcedf_tmp and robovetterdf should have the same number of TCEs
         tcedf = pd.merge(tcedf_tmp, robovetterdf, on='tce')
         # Sanity checks
-        assert(len(tcedf_tmp) == len(robovetterdf))
-        assert(len(tcedf) == len(tcedf_tmp))
+        #assert(len(tcedf_tmp) == len(robovetterdf))
+        #assert(len(tcedf) == len(tcedf_tmp))
 
     # Convert the catalog of TCEs into a catalog of LONG-PERIOD TRANSITS
     mask = (tcedf.period > min_period) & (tcedf.mes < max_mes)
@@ -112,13 +112,13 @@ def make_transit_table(tce_input_fn, robovetter_input_fn=None,
 
 if __name__ == '__main__':
     # Real 'OPS' TCE detection results
-    ops = make_transit_table('../data/OPS-TCEs.txt', robovetter_input_fn='../data/RoboVetterOut-OPS.txt')
-    ops.to_csv('ops-tces-transits.csv', index=False)
+    #ops = make_transit_table('../data/OPS-TCEs.txt', robovetter_input_fn='../data/RoboVetterOut-OPS.txt')
+    #ops.to_csv('ops-tces-transits.csv', index=False)
 
     # Inversion run
     #inv = make_transit_table('../data/INV-TCEs.txt', robovetter_input_fn=None)
     #inv.to_csv('inv-tces-transits.csv', index=False)
 
     # Season scrambling run
-    #ss1 = make_transit_table('../data/SS1-TCEs.txt', robovetter_input_fn=None)
-    #ss1.to_csv('ss1-tces-transits.csv', index=False)
+    ss1 = make_transit_table('../data/SS1-TCEs.txt', robovetter_input_fn='../data/RoboVetterOut-SS1.txt')
+    ss1.to_csv('ss1-tces-transits.csv', index=False)

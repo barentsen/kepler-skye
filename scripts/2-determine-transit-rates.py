@@ -58,11 +58,11 @@ def get_transit_rates(transit_table_fn, planet_candidates_only=True):
 
 
 if __name__ == '__main__':
-    ops = get_transit_rates('ops-tces-transits.csv', planet_candidates_only=True)
-    ops.to_csv('ops-tces-transit-rates.csv')
+    #ops = get_transit_rates('ops-tces-transits.csv', planet_candidates_only=True)
+    #ops.to_csv('ops-tces-transit-rates.csv')
 
     #inv = get_transit_rates('inv-tces-transits.csv', planet_candidates_only=False)
     #inv.to_csv('inv-tces-transit-rates.csv')
 
-    #ss1 = get_transit_rates('ss1-tces-transits.csv', planet_candidates_only=False)
-    #ss1.to_csv('ss1-tces-transit-rates.csv')
+    ss1 = get_transit_rates('ss1-tces-transits.csv', planet_candidates_only=True)
+    ss1.to_csv('ss1-tces-transit-rates.csv')
