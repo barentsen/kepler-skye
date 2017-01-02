@@ -51,9 +51,9 @@ if __name__ == '__main__':
     df = xmatch_robovetter('../data/SS1-TCEs.txt', '../data/RoboVetterOut-SS1.txt')
     df = xmatch_clean(df, '../data/ss1TCEClean-900day-7mes-Dec2016.csv')
     df = add_real_planet_candidates(df)
-    df.to_csv('../data/ss1-tces-for-skye.csv')
+    df.to_csv('intermediate-output/ss1-tces-for-skye.csv')
 
     df = xmatch_robovetter('../data/INV-TCEs.txt', '../data/RoboVetterOut-INV.txt')
     df = xmatch_clean(df, '../data/invTCEClean-100day-9mes-Nov2016-no-header.csv')
     df = add_real_planet_candidates(df)
-    df.to_csv('../data/inv-tces-for-skye.csv')
+    df.to_csv('intermediate-output/inv-tces-for-skye.csv')

@@ -123,10 +123,10 @@ if __name__ == '__main__':
     # Inversion run:
     # We use the csv table prepared in the 'step 0' script, which contains the
     # TCEs detected in the inverted data plus reliable OPS planet candidates.
-    inv = make_transit_table('../data/inv-tces-for-skye.csv')
+    inv = make_transit_table('intermediate-output/inv-tces-for-skye.csv')
     inv.to_csv('intermediate-output/inv-tces-transits.csv', index=False)
 
     # Season scrambling run:
     # Again, we use the csv table prepared by the step 0 script.
-    ss1 = make_transit_table('../data/ss1-tces-for-skye.csv')
+    ss1 = make_transit_table('intermediate-output/ss1-tces-for-skye.csv')
     ss1.to_csv('intermediate-output/ss1-tces-transits.csv', index=False)
