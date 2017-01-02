@@ -1,3 +1,6 @@
+Skye input data
+===============
+
 This directory contains a copy of the output of the Kepler planet detection
 pipeline, version DR25, copied on Oct 25, 2017.
 
@@ -11,6 +14,10 @@ under the following names:
 * OPS-TCEs.txt (copied from /soc/nfs/so-nfs/DR25/OPS/DATA/TCEs.txt)
 * INV-TCEs.txt (copied from /soc/nfs/so-nfs/DR25/INV/DATA/TCEs.txt)
 * SS1-TCEs.txt (copied from /soc/nfs/so-nfs/DR25/SS1/DATA/TCEs.txt)
+
+And we also need the latest RoboVetter output:
+
+* RoboVetterOut-SS1.txt (copied from /soc/nfs/so-nfs/DR25/SS1/RoboVet/RoboVetterOut-SS1.txt)
 
 The table called `kepler-ccd-info-by-kic.csv` was created using the
 following query at MAST/CasJobs:
