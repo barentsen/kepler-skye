@@ -1,5 +1,7 @@
-"""Determines the observed frequency of long-period/low-mes transits as a function
-of skygroup and season."""
+"""Produces a table detailing the frequency of transits observed for
+long-period/low-mes TCEs as a function of skygroup and season.
+This table will help us identify suspicious peaks in the number of transits
+at a given epoch/skygroup in the next step."""
 import pandas as pd
 from tqdm import tqdm
 
@@ -13,7 +15,17 @@ SEASON_QUARTERS = {
 
 
 def count_days_per_season():
-    """Returns a dataframe containing the number of days per season."""
+    """Returns a pandas dataframe specifying the number of days per season.
+
+    The returned dataframe should look like this:
+
+                n_days
+    season
+    0       369.398637
+    1       373.424100
+    2       325.282400
+    3       347.636795
+    """
     KEPLER_QUARTERS = pd.read_csv('../data/kepler-quarters.csv')[1:]
     DAYS_PER_QUARTER = KEPLER_QUARTERS.last_lc_mjd - KEPLER_QUARTERS.first_lc_mjd
     seasons = [0, 1, 2, 3]
@@ -27,13 +39,18 @@ def count_days_per_season():
 
 
 def get_transit_rates(transit_table_fn, planet_candidates_only=True):
-    """Returns a dataframe containing the observed frequency of transits
+    """Returns a pandas dataframe detailing the observed frequency of transits
     grouped by skygroup and season.
     """
     # Read the list of transits
     transits = pd.read_csv(transit_table_fn)
     if planet_candidates_only:
-        transits = transits[transits.not_transit_like_flag == 0]
+        planet_candidates_mask = (
+                                    (transits.not_transit_like_flag == 0) &
+                                    (transits.centroid_offset_flag == 0) &
+                                    (transits.ephemeris_match_flag == 0)
+                                  )
+        transits = transits[planet_candidates_mask]
 
     # Group the transits by skygroup and season and count their number;
     # store the counts in a dataframe
@@ -58,11 +75,11 @@ def get_transit_rates(transit_table_fn, planet_candidates_only=True):
 
 
 if __name__ == '__main__':
-    #ops = get_transit_rates('ops-tces-transits.csv', planet_candidates_only=True)
-    #ops.to_csv('ops-tces-transit-rates.csv')
+    ops = get_transit_rates('intermediate-output/ops-tces-transits.csv', planet_candidates_only=True)
+    ops.to_csv('intermediate-output/ops-tces-transit-rates.csv')
 
-    #inv = get_transit_rates('inv-tces-transits.csv', planet_candidates_only=False)
-    #inv.to_csv('inv-tces-transit-rates.csv')
+    inv = get_transit_rates('intermediate-output/inv-tces-transits.csv', planet_candidates_only=True)
+    inv.to_csv('intermediate-output/inv-tces-transit-rates.csv')
 
-    ss1 = get_transit_rates('ss1-tces-transits.csv', planet_candidates_only=True)
-    ss1.to_csv('ss1-tces-transit-rates.csv')
+    ss1 = get_transit_rates('intermediate-output/ss1-tces-transits.csv', planet_candidates_only=True)
+    ss1.to_csv('intermediate-output/ss1-tces-transit-rates.csv')

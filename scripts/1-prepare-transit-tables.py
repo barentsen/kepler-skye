@@ -1,11 +1,13 @@
 """Creates a table of long-period/low-mes TCE transits detected by the Kepler pipeline.
 
-This script takes a 'TCEs.txt' table created by the Kepler pipeline and turns
-it into a table of transits, detailing the time, quarter, season, ccd channel,
-skygroup, etc.  This table is intended to allow the frequency of transits as a
+This script takes a txt or csv table of TCEs (e.g. 'TCEs.txt') created by the
+Kepler pipeline and turns it into a table of transits, detailing the time,
+quarter, season, ccd channel, skygroup, etc of each observable transit.
+This table of transits is intended to allow the frequency of transits as a
 function of time and CCD to be investigated, allowing time intervals and detectors
-to be identified that produces a spurious number of transits at a given time,
-in particular due to thermal changes in the spacecraft electronics.
+to be identified that produce a spurious number of transits at a given time.
+This has been found to be effective at identifying epochs affected by
+thermal changes in the spacecraft electronics.
 """
 import numpy as np
 import pandas as pd
@@ -41,13 +43,16 @@ def bkjd_to_mjd_approximate(bkjd):
 def make_transit_table(tce_input_fn, robovetter_input_fn=None,
                        min_period=50, max_mes=9e99):
     # Read the TCE table
-    columns = ['tce', 'kic', 'pn', 'period', 'epoch', 'mes', 'depth', 'duration',
-               'rplanet', 'rstar', 'tstar', 'logg', 'a', 'radratio', 'arstar', 'snr', 'srad']
-    tcedf_tmp = pd.read_fwf(tce_input_fn, comment='#', names=columns)
+    if tce_input_fn.endswith('txt'):
+        columns = ['tce', 'kic', 'pn', 'period', 'epoch', 'mes', 'depth', 'duration',
+                   'rplanet', 'rstar', 'tstar', 'logg', 'a', 'radratio', 'arstar', 'snr', 'srad']
+        tcedf_tmp = pd.read_fwf(tce_input_fn, comment='#', names=columns)
+    else:
+        tcedf_tmp = pd.read_csv(tce_input_fn)
 
     if robovetter_input_fn is None:
         tcedf = tcedf_tmp
-        tcedf['disposition'] = [None] * len(tcedf)
+        #tcedf['disposition'] = [None] * len(tcedf)
     else:
         # Add preliminary robovetter output to have best-effort dispositions
         robovetter_columns = ['tce', 'score', 'disposition', 'not_transit_like_flag',
@@ -112,13 +117,16 @@ def make_transit_table(tce_input_fn, robovetter_input_fn=None,
 
 if __name__ == '__main__':
     # Real 'OPS' TCE detection results
-    #ops = make_transit_table('../data/OPS-TCEs.txt', robovetter_input_fn='../data/RoboVetterOut-OPS.txt')
-    #ops.to_csv('ops-tces-transits.csv', index=False)
+    ops = make_transit_table('../data/OPS-TCEs.txt', robovetter_input_fn='../data/RoboVetterOut-OPS.txt')
+    ops.to_csv('intermediate-output/ops-tces-transits.csv', index=False)
 
-    # Inversion run
-    #inv = make_transit_table('../data/INV-TCEs.txt', robovetter_input_fn=None)
-    #inv.to_csv('inv-tces-transits.csv', index=False)
+    # Inversion run:
+    # We use the csv table prepared in the 'step 0' script, which contains the
+    # TCEs detected in the inverted data plus reliable OPS planet candidates.
+    inv = make_transit_table('../data/inv-tces-for-skye.csv')
+    inv.to_csv('intermediate-output/inv-tces-transits.csv', index=False)
 
-    # Season scrambling run
-    ss1 = make_transit_table('../data/SS1-TCEs.txt', robovetter_input_fn='../data/RoboVetterOut-SS1.txt')
-    ss1.to_csv('ss1-tces-transits.csv', index=False)
+    # Season scrambling run:
+    # Again, we use the csv table prepared by the step 0 script.
+    ss1 = make_transit_table('../data/ss1-tces-for-skye.csv')
+    ss1.to_csv('intermediate-output/ss1-tces-transits.csv', index=False)

@@ -1,5 +1,11 @@
-"""Identifies time periods in the long-period/low-mes Kepler DR25 TCE population
-that are suspicious."""
+"""This final step identifies the (epoch, skygroup) pairs that show a
+'suspiciously large' number of transits from long-period/low-mes TCEs;
+such clusters of transits are indicative of noisy data.
+
+The term 'suspiciously large' is quantified by means of a probability
+to see the given number of transits, as inferred from the appropriate
+binomial distribution.
+"""
 import pandas as pd
 import numpy as np
 from scipy.stats import binom, poisson
@@ -14,6 +20,8 @@ OUTLIER_CHANNELS = [26, 44, 58]
 
 
 class SkyeMetric(object):
+    """This class reads in transit data and identifies (epoch, skygroup) pairs
+    that show a suspiciously large number of transits."""
 
     def __init__(self, transit_table_fn, rates_table_fn, binsize=1.,
                  probability_threshold=1e-3, probability_threshold_combined=None):
@@ -164,11 +172,11 @@ class SkyeMetric(object):
 
         pl.subplot(212)
         _ = pl.hist(self.transits.transit_time,
-                    lw=0, facecolor='red', label='Transits before cut',
+                    lw=0, facecolor='red', label='All long-period/low-mes transits',
                     bins=(KEPLER_END_BK - KEPLER_BEGIN_BK),
                     range=(KEPLER_BEGIN_BK, KEPLER_END_BK))
-        _ = pl.hist(self.transits[~mask_transits_to_remove].transit_time,
-                    lw=0, facecolor='blue', label='Transits after cut',
+        _ = pl.hist(self.transits[~mask_transits_flagged].transit_time,
+                    lw=0, facecolor='blue', label='Transits deemed ok',
                     bins=(KEPLER_END_BK - KEPLER_BEGIN_BK),
                     range=(KEPLER_BEGIN_BK, KEPLER_END_BK))
         pl.ylim([0, 200])
@@ -182,13 +190,10 @@ class SkyeMetric(object):
 
 
 def run_skye(prefix, binsize=0.5, p_threshold=1e-6, p_threshold_global=1e-6):
-    #output_prefix = 'output/{}-bin{:.2f}-p{:.0e}-pg{:.0e}'.format(prefix, binsize, p_threshold, p_threshold_global)
     output_prefix = 'output/{}-bin{:.2f}-p{:.0e}'.format(prefix, binsize, p_threshold)
-    if prefix == 'ss1':
-        transit_rates_fn = 'ops-tces-transit-rates.csv'
-    else:
-        transit_rates_fn = prefix + '-tces-transit-rates.csv'
-    skye = SkyeMetric(prefix + '-tces-transits.csv',
+    transit_table_fn = 'intermediate-output/' + prefix + '-tces-transits.csv'
+    transit_rates_fn = 'intermediate-output/' + prefix + '-tces-transit-rates.csv'
+    skye = SkyeMetric(transit_table_fn,
                       transit_rates_fn,
                       binsize=binsize,
                       probability_threshold=p_threshold,
@@ -202,24 +207,11 @@ def run_skye(prefix, binsize=0.5, p_threshold=1e-6, p_threshold_global=1e-6):
 
 
 if __name__ == '__main__':
-    #skye = run_skye('ops',
-    #                binsize=0.25,
-    #                p_threshold=1e-10)
-    
-    for binsize in [0.5]:
-        for p_threshold in [1e-9, 1e-6, 1e-5, 1e-4, 5e-4, 1e-3, 1e-2]:
-            skye = run_skye('ss1',
-                            binsize=binsize,
-                            p_threshold=p_threshold,
-                            p_threshold_global=1e-12) 
 
-    """
     for prefix in ['ops', 'inv', 'ss1']:
-        for binsize in [2.0, 1.0, 0.5, 0.2, 0.1]:
-            for p_threshold in [1e-6, 1e-5, 1e-4, 1e-3]:
-                for p_threshold_global in [1e-6, 1e-5]:
-                    skye = run_skye(prefix,
-                                    binsize=binsize,
-                                    p_threshold=p_threshold,
-                                    p_threshold_global=p_threshold_global)
-    """
+        for binsize in [0.5]:
+            for p_threshold in [1e-4, 5e-4]:
+                skye = run_skye(prefix,
+                                binsize=binsize,
+                                p_threshold=p_threshold,
+                                p_threshold_global=1e-12)
