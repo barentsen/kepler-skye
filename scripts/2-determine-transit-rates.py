@@ -47,7 +47,6 @@ def get_transit_rates(transit_table_fn, planet_candidates_only=True):
     if planet_candidates_only:
         planet_candidates_mask = (
                                     (transits.not_transit_like_flag == 0) &
-                                    (transits.centroid_offset_flag == 0) &
                                     (transits.ephemeris_match_flag == 0)
                                   )
         transits = transits[planet_candidates_mask]

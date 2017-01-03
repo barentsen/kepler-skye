@@ -41,7 +41,6 @@ def add_real_planet_candidates(tce_df):
     ops_df = xmatch_robovetter('../data/OPS-TCEs.txt', '../data/RoboVetterOut-OPS.txt')
     planet_candidates_mask = (
                                 (ops_df.not_transit_like_flag == 0) &
-                                (ops_df.centroid_offset_flag == 0) &
                                 (ops_df.ephemeris_match_flag == 0)
                               )
     return pd.concat((tce_df, ops_df[planet_candidates_mask]))
