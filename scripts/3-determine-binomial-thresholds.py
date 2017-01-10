@@ -132,6 +132,7 @@ class SkyeMetric(object):
 
 
     def write_definition(self, output_fn):
+        """Produces a definition file listing all flagged time bins."""
         print('Writing skye metric definition to {}'.format(output_fn))
         with open(output_fn, 'w') as out:
             out.write('# This file specifies the times (floored bkjd) and skygroups during which\n')
@@ -143,6 +144,56 @@ class SkyeMetric(object):
             for bin_id in self.bad_bin_ids_all_channels:
                 for channel in range(1, 85):
                     out.write('{} {}\n'.format(bin_id, channel))
+
+
+    def write_definition_transits(self, output_fn):
+        """Produces a definition file listing all flagged transits rather than time bins."""
+        print('Writing skye metric definition to {}'.format(output_fn))
+        with open(output_fn, 'w') as out:
+            out.write('# This file specifies the transits flagged by Geert\'s skye as unreliable.\n')
+            out.write('#\n')
+            out.write('# tce transit_time_bkjd flag\n')
+            for row in self.transits[self.mask_transits_in_bad_bins].itertuples():
+                out.write('{} {:.10f} 1\n'.format(row.tce, row.transit_time))
+            """
+            for row in self.bad_bins.reset_index().itertuples():
+                out.write('{:.2f} {}\n'.format(row.bin_id, row.skygroup))
+                # Flag transits that fell on the given skygroup 
+                # the time interval [bkjd_start, bkjd_start + binsize]
+                bkjd_start = row.bin_id
+                mask_flagged_transits = (self.transits.skygroup == row.skygroup
+                self.transits.transit_time >= bkjd_start
+                self.transits.transit_time < (bkjd_start + self.binsize)
+            """   
+            #for bin_id in self.bad_bin_ids_all_channels:
+            #    for channel in range(1, 85):
+            #        out.write('{} {}\n'.format(bin_id, channel))
+
+    def write_definition_transits2(self, output_fn):
+        """Alternative implementation of the above to verify correctness."""
+        print('Writing skye metric definition to {}'.format(output_fn))
+        with open(output_fn, 'w') as out:
+            out.write('# This file specifies the transits flagged by Geert\'s skye as unreliable.\n')
+            out.write('#\n')
+            out.write('# tce transit_time_bkjd flag\n')
+            #for row in self.transits[self.mask_transits_in_bad_bins].itertuples():
+            #    out.write('{} {:.8f} 1\n'.format(row.tce, row.transit_time))
+            for row in self.bad_bins.reset_index().itertuples():
+                # Flag transits that fell on the given skygroup 
+                # the time interval [bkjd_start, bkjd_start + binsize]
+                bkjd_start = row.bin_id
+                mask_flagged_transits = (
+                        (self.transits.skygroup == row.skygroup) &
+                        (self.transits.transit_time >= bkjd_start) &
+                        (self.transits.transit_time < (bkjd_start + self.binsize))
+                            )
+                for row in self.transits[mask_flagged_transits].itertuples():
+                    out.write('{} {:.10f} 1\n'.format(row.tce, row.transit_time))
+            #for bin_id in self.bad_bin_ids_all_channels:
+            #    for channel in range(1, 85):
+            #        out.write('{} {}\n'.format(bin_id, channel))
+
+
 
     def plot(self, output_fn):
         mask_transits_flagged = self.mask_transits_in_bad_bins | self.mask_transits_in_bad_bin_ids
@@ -207,6 +258,8 @@ def run_skye(prefix, binsize=0.5, p_threshold=1e-6, p_threshold_global=1e-6):
                       probability_threshold_combined=p_threshold_global)
     skye.print_summary()
     skye.write_definition(output_prefix + '-definition.txt')
+    skye.write_definition_transits(output_prefix + '-definition-transits.txt')
+    skye.write_definition_transits2(output_prefix + '-definition-transits2.txt')
     skye.plot(output_prefix + '-skye.png')
     skye.thresholds.to_excel(output_prefix + '-thresholds.xls')
     skye.bad_bins.to_excel(output_prefix + '-badbins.xls')
