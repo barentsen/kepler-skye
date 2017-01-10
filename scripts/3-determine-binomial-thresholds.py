@@ -113,6 +113,9 @@ class SkyeMetric(object):
         print('Identified {} bad bins for all channels.'.format(len(bins_to_remove)))
 
         self.mask_transits_in_bad_bin_ids = self.transits['bin_id'].isin(bins_to_remove)
+        print('Flagged {} out of {} transits as suspicious.'.format(self.mask_transits_in_bad_bin_ids.sum(),
+                                                                    len(self.mask_transits_in_bad_bin_ids)))
+
 
         return bins_to_remove
 
@@ -145,6 +148,9 @@ class SkyeMetric(object):
         mask_transits_flagged = self.mask_transits_in_bad_bins | self.mask_transits_in_bad_bin_ids
         tces_to_remove = self.transits[mask_transits_flagged].tce.unique()
         mask_transits_to_remove = self.transits.tce.isin(tces_to_remove)
+        print('Transits directly flagged: {}'.format(mask_transits_flagged.sum()))
+        print('Transits affected: {}'.format(mask_transits_to_remove.sum()))
+
 
         pc_before = (self.transits.groupby('tce').first().disposition == 'PC').sum()
         pc_after = (self.transits[~mask_transits_to_remove].groupby('tce').first().disposition == 'PC').sum()
@@ -192,7 +198,8 @@ class SkyeMetric(object):
 def run_skye(prefix, binsize=0.5, p_threshold=1e-6, p_threshold_global=1e-6):
     output_prefix = 'output/{}-bin{:.2f}-p{:.0e}'.format(prefix, binsize, p_threshold)
     transit_table_fn = 'intermediate-output/' + prefix + '-tces-transits.csv'
-    transit_rates_fn = 'intermediate-output/' + prefix + '-tces-transit-rates.csv'
+    #transit_rates_fn = 'intermediate-output/' + prefix + '-tces-transit-rates.csv'
+    transit_rates_fn = 'intermediate-output/ops-tces-transit-rates.csv'
     skye = SkyeMetric(transit_table_fn,
                       transit_rates_fn,
                       binsize=binsize,
@@ -214,4 +221,4 @@ if __name__ == '__main__':
                 skye = run_skye(prefix,
                                 binsize=binsize,
                                 p_threshold=p_threshold,
-                                p_threshold_global=1e-12)
+                                p_threshold_global=1e99)
